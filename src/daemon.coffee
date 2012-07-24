@@ -3,16 +3,13 @@
 
 {EventEmitter} = require "events"
 HttpServer     = require "./http_server"
-# DnsServer      = require "./dns_server"
 fs             = require "fs"
 path           = require "path"
 
 module.exports = class Daemon extends EventEmitter
   # Create a new `Daemon` with the given `Configuration` instance.
   constructor: (@configuration) ->
-    # `HttpServer` and `DnsServer` instances are created accordingly.
     @httpServer = new HttpServer @configuration
-    # @dnsServer  = new DnsServer @configuration
     # The daemon stops in response to `SIGINT`, `SIGTERM` and
     # `SIGQUIT` signals.
     process.on "SIGINT",  @stop
@@ -43,27 +40,20 @@ module.exports = class Daemon extends EventEmitter
   #
   # * First, start the HTTP server. If the HTTP server can't boot,
   #   emit an `error` event and abort.
-  # * Next, start the DNS server. If the DNS server can't boot, stop
-  #   the HTTP server, emit an `error` event and abort.
-  # * If both servers start up successfully, emit a `start` event and
-  #   mark the daemon as started.
+  # * Emit a `start` event and mark the daemon as started.
   start: ->
-    console.log "here"
     return if @starting or @started
     @starting = true
 
     startServer = (server, port, callback) -> process.nextTick ->
-      console.log "starting" + server + port
       try
         server.on 'error', callback
 
         server.once 'listening', ->
           server.removeListener 'error', callback
           callback()
-        console.log "server.listen on " + port
         server.listen port
-        process.setuid('elliott')
-        console.log "here"
+        process.setuid(process.env['LOGNAME'])
       catch err
         callback err
 
@@ -75,17 +65,12 @@ module.exports = class Daemon extends EventEmitter
     flunk = (err) =>
       @starting = false
       try @httpServer.close()
-      #try @dnsServer.close()
       @emit "error", err
 
-    {httpPort, dnsPort} = @configuration
+    {httpPort} = @configuration
     startServer @httpServer, httpPort, (err) =>
       if err then flunk err
-      # else startServer @dnsServer, dnsPort, (err) =>
-      #   if err then flunk err
-      else
-        console.log "running"
-        pass()
+      else pass()
 
   # Stop the daemon if it's started. This means calling `close` on
   # both servers in succession, beginning with the HTTP server, and
