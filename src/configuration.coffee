@@ -21,18 +21,24 @@ module.exports = class Configuration
   #
   # See the `Configuration` constructor for a complete list of
   # environment options.
+  console.log "cfg:24"
   @userConfigurationPath: path.join process.env.HOME, ".powconfig"
+  console.log "cfg:26" + @userConfigurationPath
 
   # Evaluates the user configuration script and calls the `callback`
   # with the environment variables if the config file exists. Any
   # script errors are passed along in the first argument. (No error
   # occurs if the file does not exist.)
   @loadUserConfigurationEnvironment: (callback) ->
+    console.log "cfg:33"
     getUserEnv (err, env) =>
+      console.log "cfg:35"
       if err
         callback err
       else
-        path.exists p = @userConfigurationPath, (exists) ->
+        console.log "cfg:39"
+
+        fs.exists p = @userConfigurationPath, (exists) ->
           if exists
             sourceScriptEnv p, env, callback
           else
@@ -43,15 +49,18 @@ module.exports = class Configuration
   # affect the process environment and will be copied to spawned
   # subprocesses.
   @getUserConfiguration: (callback) ->
+    console.log "cfg:48"
     @loadUserConfigurationEnvironment (err, env) ->
+      console.log "cfg:50"
       if err
         callback err
       else
+        console.log "cfg:ok:54"
         callback null, new Configuration env
 
   # A list of option names accessible on `Configuration` instances.
   @optionNames: [
-    "bin", "dstPort", "httpPort", "dnsPort", "timeout", "workers",
+    "bin", "httpPort", "timeout", "workers",
     "domains", "extDomains", "hostRoot", "logRoot", "rvmPath"
   ]
 
@@ -69,15 +78,15 @@ module.exports = class Configuration
 
     # `POW_DST_PORT`: the public port Pow expects to be forwarded or
     # otherwise proxied for incoming HTTP requests. Defaults to `80`.
-    @dstPort    = env.POW_DST_PORT    ? 80
+    # @dstPort    = env.POW_DST_PORT    ? 80
 
     # `POW_HTTP_PORT`: the TCP port Pow opens for accepting incoming
     # HTTP requests. Defaults to `20559`.
-    @httpPort   = env.POW_HTTP_PORT   ? 20559
+    @httpPort   = env.POW_HTTP_PORT   ? 80
 
     # `POW_DNS_PORT`: the UDP port Pow listens on for incoming DNS
     # queries. Defaults to `20560`.
-    @dnsPort    = env.POW_DNS_PORT    ? 20560
+    # @dnsPort    = env.POW_DNS_PORT    ? 20560
 
     # `POW_TIMEOUT`: how long (in seconds) to leave inactive Rack
     # applications running before they're killed. Defaults to 15

@@ -3,7 +3,7 @@
 
 {EventEmitter} = require "events"
 HttpServer     = require "./http_server"
-DnsServer      = require "./dns_server"
+# DnsServer      = require "./dns_server"
 fs             = require "fs"
 path           = require "path"
 
@@ -12,7 +12,7 @@ module.exports = class Daemon extends EventEmitter
   constructor: (@configuration) ->
     # `HttpServer` and `DnsServer` instances are created accordingly.
     @httpServer = new HttpServer @configuration
-    @dnsServer  = new DnsServer @configuration
+    # @dnsServer  = new DnsServer @configuration
     # The daemon stops in response to `SIGINT`, `SIGTERM` and
     # `SIGQUIT` signals.
     process.on "SIGINT",  @stop
@@ -28,7 +28,7 @@ module.exports = class Daemon extends EventEmitter
     @on "close", => @watcher?.close()
 
   hostRootChanged: =>
-    path.exists @restartFilename, (exists) =>
+    fs.exists @restartFilename, (exists) =>
       @restart() if exists
 
   # Remove the `~/.pow/restart.txt` file, if present, and emit a
@@ -48,19 +48,22 @@ module.exports = class Daemon extends EventEmitter
   # * If both servers start up successfully, emit a `start` event and
   #   mark the daemon as started.
   start: ->
+    console.log "here"
     return if @starting or @started
     @starting = true
 
     startServer = (server, port, callback) -> process.nextTick ->
+      console.log "starting" + server + port
       try
         server.on 'error', callback
 
         server.once 'listening', ->
           server.removeListener 'error', callback
           callback()
-
+        console.log "server.listen on " + port
         server.listen port
-
+        process.setuid('elliott')
+        console.log "here"
       catch err
         callback err
 
@@ -72,15 +75,17 @@ module.exports = class Daemon extends EventEmitter
     flunk = (err) =>
       @starting = false
       try @httpServer.close()
-      try @dnsServer.close()
+      #try @dnsServer.close()
       @emit "error", err
 
     {httpPort, dnsPort} = @configuration
     startServer @httpServer, httpPort, (err) =>
       if err then flunk err
-      else startServer @dnsServer, dnsPort, (err) =>
-        if err then flunk err
-        else pass()
+      # else startServer @dnsServer, dnsPort, (err) =>
+      #   if err then flunk err
+      else
+        console.log "running"
+        pass()
 
   # Stop the daemon if it's started. This means calling `close` on
   # both servers in succession, beginning with the HTTP server, and
@@ -101,7 +106,7 @@ module.exports = class Daemon extends EventEmitter
         callback err
 
     stopServer @httpServer, =>
-      stopServer @dnsServer, =>
-        @stopping = false
-        @started  = false
-        @emit "stop"
+      # stopServer @dnsServer, =>
+      @stopping = false
+      @started  = false
+      @emit "stop"

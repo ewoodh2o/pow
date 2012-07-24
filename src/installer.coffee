@@ -12,8 +12,8 @@ util     = require "util"
 
 # Import the Eco templates for the `/etc/resolver` and `launchd`
 # configuration files.
-resolverSource = require "./templates/installer/resolver"
-firewallSource = require "./templates/installer/cx.pow.firewall.plist"
+# resolverSource = require "./templates/installer/resolver"
+# firewallSource = require "./templates/installer/cx.pow.firewall.plist"
 daemonSource   = require "./templates/installer/cx.pow.powd.plist"
 
 # `InstallerFile` represents a single file candidate for installation:
@@ -29,7 +29,7 @@ class InstallerFile
   # contents, `callback` is invoked with false. Otherwise, `callback`
   # is invoked with true.
   isStale: (callback) ->
-    path.exists @path, (exists) =>
+    fs.exists @path, (exists) =>
       if exists
         fs.readFile @path, "utf8", (err, contents) =>
           if err
@@ -78,17 +78,19 @@ class InstallerFile
 module.exports = class Installer
   # Factory method that takes a `Configuration` instance and returns
   # an `Installer` for system firewall and DNS configuration files.
+  # EDIT: elliott 2012-07-23 move the powd here instead of local
+  # installer so it runs as root instead of the local user
   @getSystemInstaller: (@configuration) ->
     files = [
-      new InstallerFile "/Library/LaunchDaemons/cx.pow.firewall.plist",
-        firewallSource(@configuration),
+      new InstallerFile "/Library/LaunchAgents/cx.pow.powd.plist",
+        daemonSource(@configuration),
         true
     ]
 
-    for domain in @configuration.domains
-      files.push new InstallerFile "/etc/resolver/#{domain}",
-        resolverSource(@configuration),
-        true
+    # for domain in @configuration.domains
+    #   files.push new InstallerFile "/etc/resolver/#{domain}",
+    #     resolverSource(@configuration),
+    #     true
 
     new Installer files
 
@@ -96,8 +98,8 @@ module.exports = class Installer
   # an `Installer` for the Pow `launchctl` daemon configuration file.
   @getLocalInstaller: (@configuration) ->
     new Installer [
-      new InstallerFile "#{process.env.HOME}/Library/LaunchAgents/cx.pow.powd.plist",
-        daemonSource(@configuration)
+      # new InstallerFile "#{process.env.HOME}/Library/LaunchAgents/cx.pow.powd.plist",
+      #   daemonSource(@configuration)
     ]
 
   # Create an installer for a set of files.

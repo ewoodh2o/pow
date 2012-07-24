@@ -105,15 +105,14 @@
       if [ $NEEDS_ROOT -eq 1 ]; then
         echo "*** Installing system configuration files as root..."
         sudo "$NODE_BIN" "$POW_BIN" --install-system
-        sudo launchctl load -Fw /Library/LaunchDaemons/cx.pow.firewall.plist 2>/dev/null
       fi
 
 
 # Start (or restart) Pow.
 
       echo "*** Starting the Pow server..."
-      launchctl unload "$HOME/Library/LaunchAgents/cx.pow.powd.plist" 2>/dev/null || true
-      launchctl load -Fw "$HOME/Library/LaunchAgents/cx.pow.powd.plist" 2>/dev/null
+      launchctl unload "/Library/LaunchAgents/cx.pow.powd.plist" 2>/dev/null || true
+      launchctl load -Fw "/Library/LaunchAgents/cx.pow.powd.plist" 2>/dev/null
 
 
 # Show a message about where to go for help.
@@ -175,13 +174,13 @@
         # Try resolving and connecting to each configured domain. If
         # it doesn't work, reload the network configuration and try
         # again. Bail if it fails the second time.
-        check_domains || {
-          { reload_network_configuration && check_domains; } || {
-            echo "!!! Couldn't resolve configured domains ($POW_DOMAINS)"
-            print_troubleshooting_instructions
-            exit 1
-          }
-        }
+        # check_domains || {
+        #   { reload_network_configuration && check_domains; } || {
+        #     echo "!!! Couldn't resolve configured domains ($POW_DOMAINS)"
+        #     print_troubleshooting_instructions
+        #     exit 1
+        #   }
+        # }
       fi
 
 

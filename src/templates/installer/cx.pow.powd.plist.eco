@@ -4,6 +4,11 @@
 <dict>
         <key>Label</key>
         <string>cx.pow.powd</string>
+        <key>EnvironmentVariables</key>
+        <dict>
+                <key>HOME</key>    <string><%= process.env['HOME'] %></string>
+                <key>LOGNAME</key> <string><%= process.env['HOME'].replace('/Users/', '') %></string>
+        </dict>
         <key>ProgramArguments</key>
         <array>
                 <string><%= process.execPath %></string>
@@ -13,5 +18,7 @@
         <true/>
         <key>RunAtLoad</key>
         <true/>
+        <key>UserName</key>
+	      <string>root</string>
 </dict>
 </plist>

@@ -55,7 +55,7 @@ exports.mkdirp = (dirname, callback) ->
     if err
       paths = [p].concat(p = path.dirname p until p in ["/", "."])
       async.forEachSeries paths.reverse(), (p, next) ->
-        path.exists p, (exists) ->
+        fs.exists p, (exists) ->
           if exists then next()
           else fs.mkdir p, 0o755, (err) ->
             if err then callback err
@@ -151,9 +151,12 @@ exports.sourceScriptEnv = (script, env, options, callback) ->
 # the `defaultEncoding` parameter, or `UTF-8` if it is not set.
 exports.getUserEnv = (callback, defaultEncoding = "UTF-8") ->
   filename = makeTemporaryFilename()
+  console.log "util:154 " + filename
   loginExec "env > #{quote filename}", (err) ->
+    console.log "util:156"
     if err then callback err
     else readAndUnlink filename, (err, result) ->
+      console.log result
       if err then callback err
       else getUserLocale (locale) ->
         env = parseEnv result

@@ -1,7 +1,7 @@
 # The `command` module is loaded when the `pow` binary runs. It parses
 # any command-line arguments and determines whether to install Pow's
 # configuration files or start the daemon itself.
-
+console.log "starting in command.coffee"
 {Daemon, Configuration, Installer} = require ".."
 util = require "util"
 
@@ -15,15 +15,20 @@ usage = ->
   console.error "usage: pow [--print-config | --install-local | --install-system [--dry-run]]"
   process.exit -1
 
+console.log "in cmd.cfe:18"
+
 # Start by loading the user configuration from `~/.powconfig`, if it
 # exists. The user configuration affects both the installer and the
 # daemon.
 Configuration.getUserConfiguration (err, configuration) ->
+  console.log "in cmd.cfe:24"
   throw err if err
 
   printConfig = false
   createInstaller = null
   dryRun = false
+
+  console.log "in cmd.cfe:31"
 
   for arg in process.argv.slice(2)
     # Set a flag if --print-config is requested.
@@ -41,6 +46,8 @@ Configuration.getUserConfiguration (err, configuration) ->
     # Abort if we encounter an unknown argument.
     else
       usage()
+
+  console.log "in cmd.cfe:50"
 
   # Abort if a dry run is requested without installing anything.
   if dryRun and not createInstaller
@@ -81,6 +88,9 @@ Configuration.getUserConfiguration (err, configuration) ->
   # Start up the Pow daemon if no arguments were passed. Terminate the
   # process if the daemon requests a restart.
   else
+    console.log "init daemon.coffee"
+
     daemon = new Daemon configuration
     daemon.on "restart", -> process.exit()
+    console.log "start daemon.coffee"
     daemon.start()

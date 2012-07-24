@@ -95,8 +95,6 @@ task 'install', 'Install pow configuration files', ->
         sh "sudo ./bin/pow --install-system", (err) ->
           if err
             callback err
-          else
-            sh "sudo launchctl load /Library/LaunchDaemons/cx.pow.firewall.plist", callback
       else
         callback()
 
@@ -105,13 +103,13 @@ task 'install', 'Install pow configuration files', ->
     console.error "*** Installed"
 
 task 'start', 'Start pow server', ->
-  agent = "#{process.env['HOME']}/Library/LaunchAgents/cx.pow.powd.plist"
+  agent = "/Library/LaunchAgents/cx.pow.powd.plist"
   console.error "*** Starting the Pow server..."
-  exec "launchctl load '#{agent}'", (err, stdout, stderr) ->
+  exec "sudo launchctl load '#{agent}'", (err, stdout, stderr) ->
     console.error stderr if err
 
 task 'stop', 'Stop pow server', ->
-  agent = "#{process.env['HOME']}/Library/LaunchAgents/cx.pow.powd.plist"
+  agent = "/Library/LaunchAgents/cx.pow.powd.plist"
   console.error "*** Stopping the Pow server..."
-  exec "launchctl unload '#{agent}'", (err, stdout, stderr) ->
+  exec "sudo launchctl unload '#{agent}'", (err, stdout, stderr) ->
     console.error stderr if err

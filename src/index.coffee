@@ -18,7 +18,7 @@ module.exports =
   Daemon:          require "./daemon"
 
   # [DnsServer](dns_server.html) handles incoming DNS queries.
-  DnsServer:       require "./dns_server"
+  # DnsServer:       require "./dns_server"
 
   # [HttpServer](http_server.html) handles incoming HTTP requests.
   HttpServer:      require "./http_server"
