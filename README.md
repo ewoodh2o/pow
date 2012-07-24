@@ -1,3 +1,18 @@
+## Cisco AnyConnect Compatibility WIP
+Started to make Pow compatible with the Cisco AnyConnect VPN client.  This isn't an ideal 
+situation, but it was supposed to be close enough.  To make it work:
+
+* Remove the DNS server and it's auto-dropping of /etc/resolver files.  These cause AnyConnect to gray-screen within about 30 seconds of starting the VPN.
+* Remove IPFW rule that forwards traffic from 80 to the default Pow port of 20559.  This also causes AnyConnect to gray-screen.
+* Run Pow on port 80 by default
+* Run powd as root via system LaunchAgent, so that it can bind to port 80
+* setuid back to unprivileged user after binding for security
+
+I however abandoned this when I learned that AnyConnect was also overwriting /etc/hosts on boot.  There is at least one other bug (because using something like localtest.me doesn't work either), but I stopped digging into it eventually.
+
+## Original Readme
+
+
                           W
                          R RW        W.
                        RW::::RW    DR::R
